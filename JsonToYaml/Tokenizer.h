@@ -7,7 +7,7 @@ struct String {
 };
 
 struct Number {
-	std::variant<long, double> value;
+	std::string value;
 };
 
 struct Boolean {
@@ -34,7 +34,7 @@ using Token = std::variant<
 	ClosedBracket,
 	Colon,
 	Comma,
-	EndOfFile,
+	EndOfFile
 >;
 
 class Tokenizer {

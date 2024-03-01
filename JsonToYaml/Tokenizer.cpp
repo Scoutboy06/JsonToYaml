@@ -7,7 +7,7 @@ Token Tokenizer::NextToken() {
 
 	char peek = Peek();
 
-	if (peek == '-' || isalnum(peek)) {
+	if (peek == '-' || std::isdigit(peek)) {
 		return ParseNumber();
 	}
 
@@ -25,6 +25,7 @@ Token Tokenizer::NextToken() {
 		case '\0': return EndOfFile();
 	}
 
+	Skip();
 	return NextToken();
 }
 
@@ -35,7 +36,7 @@ String Tokenizer::ParseString() {
 	char ch = Next();
 	bool isEscaped = false;
 
-	while (ch != '"' && !isEscaped) {
+	while (!(ch == '"' && !isEscaped)) {
 		if (ch == '\\') {
 			isEscaped = !isEscaped;
 		}
@@ -66,9 +67,9 @@ Number Tokenizer::ParseNumber() {
 	Back();
 
 	if (isDecimal) {
-		return Number{ stod(number) };
+		return Number{ number };
 	} else {
-		return Number{ stol(number) };
+		return Number{ number };
 	}
 }
 
@@ -113,9 +114,6 @@ void Tokenizer::Skip() { cursor++; };
 
 void Tokenizer::Back() { cursor--; };
 
-/**
-* @bref Steps to the next character, increasing the counter
-*/
 char Tokenizer::Next() {
 	if (cursor + 1 >= input.length()) {
 		return '\0';
@@ -123,10 +121,6 @@ char Tokenizer::Next() {
 	return input[++cursor];
 }
 
-/**
-* @brief Steps to the next character, increasing the counter.
-* Throws an error if the next character does not equal the expected one.
-*/
 void Tokenizer::Expect(char ch) {
 	if (Next() != ch) {
 		throw std::exception("Invalid character: " + ch);
