@@ -6,8 +6,17 @@
 
 #include "Tokenizer.h"
 
-class Object;
-class Array;
+struct Object {
+	std::map<String, JsonValue> value;
+};
+
+struct Array {
+	std::vector<JsonValue> value;
+};
+
+struct Json {
+	JsonValue& body;
+};
 
 using JsonValue = std::variant<
 	Object,
@@ -18,15 +27,12 @@ using JsonValue = std::variant<
 	Null,
 >;
 
-struct Json {
-	JsonValue& body;
-};
-
 class Parser {
 private:
 	const std::string& input;
+	Tokenizer tokenizer;
 public:
-	static Json Parse(const std::string& input);
+	Json Parse(const std::string& input);
 
 	Object ParseObject();
 	Array ParseArray();
