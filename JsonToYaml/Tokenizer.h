@@ -2,18 +2,9 @@
 #include <string>
 #include <variant>
 
-struct String {
-	std::string value;
-};
-
-struct Number {
-	std::string value;
-};
-
-struct Boolean {
-	bool value;
-};
-
+struct String { std::string value; };
+struct Number { std::string value; };
+struct Boolean { bool value; };
 struct Null {};
 struct OpenCurly {};
 struct ClosedCurly {};
