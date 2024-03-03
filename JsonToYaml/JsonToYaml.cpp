@@ -1,20 +1,54 @@
-// JsonToYaml.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
+#include <fstream>
+#include <string>
 #include <iostream>
+#include <sstream>
+#include <variant>
+
+#include "Tokenizer.h"
 
 int main()
 {
-    std::cout << "Hello World!\n";
+	std::ifstream input("./test.json");
+
+	if (!input.is_open()) {
+		std::cout << "Unable to open file" << std::endl;
+		return 1;
+	}
+
+	std::stringstream buffer;
+	buffer << input.rdbuf();
+	std::string str = buffer.str();
+
+	std::cout << str.length() << ", " << str[0] << std::endl;
+
+	Tokenizer tokenizer(str);
+
+	/*while (true) {
+		Token next = tokenizer.NextToken();
+
+		if (auto str = std::get_if<String>(&next)) {
+			std::cout << "String: " << str->value;
+		}
+		
+		else if (auto num = std::get_if<Number>(&next)) {
+			if (auto l = std::get_if<long>(&(num->value))) {
+				std::cout << "Long: " << l;
+			}
+
+			else if (auto d = std::get_if<double>(&(num->value))) {
+				std::cout << "Double: " << d;
+			}
+		}
+
+		else if (auto b = std::get_if<Boolean>(&next)) {
+			std::cout << "Boolean: " << b->value;
+		}
+
+		std::cout << std::endl;
+
+		if (std::holds_alternative<EndOfFile>(next)) {
+			std::cout << "End of file" << std::endl;
+			break;
+		}
+	}*/
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file

@@ -4,72 +4,47 @@
 // =====  Type classes  =====
 // ==========================
 
-class Json {
-public:
-	explicit Json(const JsonTypeVariant& data) : _data(data) {};
-private:
-	const JsonTypeVariant& _data;
-};
-
 class Object {
 public:
-	explicit Object(const JsonObjectVariant& data) : _data(data) {};
+	explicit Object(const std::map<String, JsonValue>& data) : _data(data) {};
 private:
-	const JsonObjectVariant& _data;
+	const std::map<String, JsonValue>& _data;
 };
 
 class Array {
 public:
-	explicit Array(const JsonArrayVariant& data) : _data(data) {};
+	explicit Array(const std::vector<JsonValue>& data) : _data(data) {};
 private:
-	const JsonArrayVariant& _data;
+	const std::vector<JsonValue>& _data;
 };
-
-class String {
-public:
-	explicit String(const std::string& data) : _data(data) {};
-private:
-	const std::string& _data;
-};
-
-class Number {
-public:
-	explicit Number(const long data) : _data(data) {};
-private:
-	const long _data;
-};
-
-class Boolean {
-public:
-	explicit Boolean(const bool data) : _data(data) {};
-private:
-	const bool _data;
-};
-
-class Null {
-public:
-	explicit Null() {};
-};
-
-Object Json::Object(const JsonObjectVariant& data) { return Object(data); };
-
-Array Json::Array(const JsonArrayVariant& data) { return Array(data); };
-
-String Json::String(const std::string& data) { return String(data); };
-
-Number Json::Number(const long data) { return Number(data); };
-
-Boolean Json::Boolean(const bool data) { return Boolean(data); };
-
-Null Json::Null() { return Null(); };
 
 // =========================
 // =======  Parsing  =======
 // =========================
 
 Json Parser::Parse(const std::string& input) {
+	Tokenizer tokenizer(input);
+
+	Token token = tokenizer.NextToken();
+
+	if (std::holds_alternative<OpenCurly>(token)) {
+		auto v = ParseObject();
+		return Json{ v };
+	}
+
+	while (!std::holds_alternative<EndOfFile>(token)) {
+		if (std::holds_alternative<OpenCurly>(token)) {
+
+		}
+
+		token = tokenizer.NextToken();
+	}
 };
 
-Json Parser::ParseObject() {
+Object Parser::ParseObject() {
+
 };
 
+Array Parser::ParseArray() {
+
+}
