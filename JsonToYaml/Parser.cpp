@@ -6,22 +6,22 @@ Json Parser::Parse(const std::string& input) {
 	Token token = tokenizer.NextToken();
 
 	if (std::holds_alternative<OpenCurly>(token)) {
-		Object v = ParseObject();
-		return Json{ v };
+		return Json{ ParseObject() };
 	}
 
 	if (std::holds_alternative<OpenBracket>(token)) {
-		Array v = ParseArray();
-		return Json{ v };
+		return Json{ ParseArray() };
 	}
 
-	while (!std::holds_alternative<EndOfFile>(token)) {
-		if (std::holds_alternative<OpenCurly>(token)) {
-
-		}
-
-		token = tokenizer.NextToken();
+	if (String* str = std::get_if<String>(&token)) {
+		return Json{ *str };
 	}
+
+	if (Number* num = std::get_if<Number>(&token)) {
+		return Json{ *num };
+	}
+
+	throw std::exception("Invalid token at beginning of file");
 };
 
 Object Parser::ParseObject() {

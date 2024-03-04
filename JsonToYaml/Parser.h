@@ -15,7 +15,7 @@ struct Array {
 };
 
 struct Json {
-	JsonValue& body;
+	JsonValue body;
 };
 
 using JsonValue = std::variant<
