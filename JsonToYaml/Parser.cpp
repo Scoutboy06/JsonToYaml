@@ -1,11 +1,13 @@
 #include "Parser.h"
 
-Json ParseJson(std::ifstream& stream) {
+static Json ParseJson(std::ifstream& stream) {
 	Parser parser(stream);
 	return parser.Parse();
 }
 
 Json Parser::Parse() {
+	SkipWhitespace();
+
 	switch (peekChar) {
 		case '{': return Json{ ParseObject() };
 		case '[': return Json{ ParseArray() };
@@ -19,12 +21,24 @@ Json Parser::Parse() {
 		return Json{ ParseNumber() };
 	}
 
+	Advance();
+
 	throw std::exception("Invalid character at beginning of file");
 };
 
 void Parser::Advance() {
+	lineColIndex++;
+
+	if (currChar == '\n') {
+		lineIndex++;
+		lineColIndex = 0;
+	}
+
 	currChar = peekChar;
 	stream.get(peekChar);
+
+	if (isPeekEOF) isEOF = true;
+	if (stream.eof()) isPeekEOF = true;
 }
 
 void Parser::SkipWhitespace() {
@@ -33,22 +47,19 @@ void Parser::SkipWhitespace() {
 	}
 }
 
-void Parser::Expect(char c) const {
+void Parser::Expect(char c) {
 	if (currChar != c) {
 		throw std::exception("Invalid character");
 	}
+	Advance();
 }
 
-void Parser::ExpectPeek(char c) const {
-	if (peekChar != c) {
-		throw std::exception("Invalid character");
-	}
-}
-
-void Parser::ExpectEither(std::initializer_list<char> list) const {
+void Parser::ExpectEither(std::initializer_list<char> list) {
 	for (char ch : list) {
-		if (ch == currChar)
+		if (ch == currChar) {
+			Advance();
 			return;
+		}
 	}
 
 	throw std::exception("Invalid token");
@@ -58,10 +69,9 @@ String Parser::ParseString() {
 	std::string result;
 
 	Expect('"');
-	Advance();
 	bool isEscaped = false;
 
-	while (currChar != '"' && isEscaped) {
+	while (!(currChar == '"' && !isEscaped)) {
 		if (currChar == '\\') {
 			isEscaped = !isEscaped;
 		}
@@ -70,7 +80,6 @@ String Parser::ParseString() {
 		Advance();
 	}
 
-	// Since the current character is a ", advance
 	Advance();
 
 	return String{ result };
@@ -116,8 +125,37 @@ Number Parser::ParseNumber() {
 	return Number{ number };
 }
 
+Boolean Parser::ParseBoolean() {
+	if (currChar == 't') {
+		Expect('t');
+		Expect('r');
+		Expect('u');
+		Expect('e');
+		return Boolean{ true };
+	} else if (currChar == 'f') {
+		Expect('f');
+		Expect('a');
+		Expect('l');
+		Expect('s');
+		Expect('e');
+		return Boolean{ false };
+	} else {
+		throw std::exception("Invalid character");
+	}
+}
+
+Null Parser::ParseNull() {
+	Expect('n');
+	Expect('u');
+	Expect('l');
+	Expect('l');
+	return Null{};
+}
+
 Object Parser::ParseObject() {
 	std::map<String, JsonValue> object;
+
+	Expect('{');
 
 	enum State { Key, Value };
 
@@ -129,6 +167,9 @@ Object Parser::ParseObject() {
 			if (currChar == '"') {
 				key = ParseString();
 				state = Value;
+				SkipWhitespace();
+				Expect(':');
+
 			} else {
 				throw std::exception("Invalid key in object");
 			}
@@ -146,9 +187,16 @@ Object Parser::ParseObject() {
 					if (std::isdigit(peekChar)) {
 						object.insert_or_assign(key, ParseNumber());
 					} else {
-						throw std::exception("Invalid character at beginning of file");
+						throw std::exception("Invalid character");
 					}
 			}
+
+			SkipWhitespace();
+			if (currChar == '}') {
+				break;
+			}
+			Expect(',');
+			SkipWhitespace();
 		}
 
 		Advance();
@@ -158,52 +206,50 @@ Object Parser::ParseObject() {
 		throw std::exception("Unexpected end of object");
 	}
 
+
+	// Since currChar == '{', advance
+	Advance();
+
 	return Object{ object };
 };
 
 Array Parser::ParseArray() {
 	std::vector<JsonValue> array;
-	
-	Token token = tokenizer.NextToken();
 
-	while (!std::holds_alternative<ClosedBracket>(token)) {
-		if (std::holds_alternative<EndOfFile>(token)) {
+	Expect('[');
+	SkipWhitespace();
+
+	while (currChar != ']') {
+		if(isEOF) {
 			throw std::exception("Unexpected end of file");
 		}
 
-		// "," Comma
-		if (std::holds_alternative<Comma>(token)) {
-			continue;
-		}
-
-		// "{" Open curly brace
-		if (std::holds_alternative<OpenCurly>(token)) {
+		if (currChar == '{') {
 			array.push_back(ParseObject());
 		}
 		
-		// "[" Open bracket
-		else if (std::holds_alternative<OpenBracket>(token)) {
+		else if (currChar == '[') {
 			array.push_back(ParseArray());
 		}
 		
 		// String
-		else if(String* str = std::get_if<String>(&token)){
-			array.push_back(*str);
+		else if(currChar == '"') {
+			array.push_back(ParseString());
 		}
 		
 		// Number
-		else if (Number* num = std::get_if<Number>(&token)) {
-			array.push_back(*num);
+		else if (std::isdigit(currChar)) {
+			array.push_back(ParseNumber());
 		}
 		
 		// Boolean
-		else if (Boolean* b = std::get_if<Boolean>(&token)) {
-			array.push_back(*b);
+		else if (currChar == 't' || currChar == 'f') {
+			array.push_back(ParseBoolean());
 		}
 
 		// Null
-		else if (std::holds_alternative<Null>(token)) {
-			array.push_back(Null());
+		else if (currChar == 'n') {
+			array.push_back(ParseNull());
 		}
 		
 		// Invalid token
@@ -211,8 +257,13 @@ Array Parser::ParseArray() {
 			throw std::exception("Invalid token");
 		}
 
-		token = tokenizer.NextToken();
+		SkipWhitespace();
+		ExpectEither({ ',', ']' });
+		SkipWhitespace();
 	}
+
+	// Since currChar == ']'
+	Advance();
 
 	return Array{ array };
 }
