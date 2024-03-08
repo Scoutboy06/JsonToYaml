@@ -218,8 +218,6 @@ Array Parser::ParseArray() {
 	SkipWhitespace();
 
 	while (currChar != ']') {
-		std::cout << currChar << std::endl;
-
 		if(isEOF) {
 			throw std::exception("Unexpected end of file");
 		}
