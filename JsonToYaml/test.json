@@ -1,5 +1,5 @@
 {
-  "key": "value",
+  "hello": "there",
   "numbers": [ 0, 1, 2, 3 ],
   "anObject": {
     "hello": "world",

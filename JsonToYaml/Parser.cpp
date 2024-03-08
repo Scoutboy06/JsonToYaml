@@ -1,6 +1,6 @@
 #include "Parser.h"
 
-static Json ParseJson(std::ifstream& stream) {
+Json Json::Parse(std::ifstream& stream) {
 	Parser parser(stream);
 	return parser.Parse();
 }
@@ -8,7 +8,7 @@ static Json ParseJson(std::ifstream& stream) {
 Json Parser::Parse() {
 	SkipWhitespace();
 
-	switch (peekChar) {
+	switch (currChar) {
 		case '{': return Json{ ParseObject() };
 		case '[': return Json{ ParseArray() };
 		case '"': return Json{ ParseString() };
@@ -17,11 +17,9 @@ Json Parser::Parse() {
 		case 'n': return Json{ ParseNull() };
 	}
 
-	if (std::isdigit(peekChar)) {
+	if (std::isdigit(currChar)) {
 		return Json{ ParseNumber() };
 	}
-
-	Advance();
 
 	throw std::exception("Invalid character at beginning of file");
 };
@@ -156,11 +154,12 @@ Object Parser::ParseObject() {
 	std::map<String, JsonValue> object;
 
 	Expect('{');
+	SkipWhitespace();
 
 	enum State { Key, Value };
 
-	String key;
 	State state = Key; // What we expect next
+	String key;
 
 	while (currChar != '}') {
 		if (state == Key) {
@@ -169,7 +168,7 @@ Object Parser::ParseObject() {
 				state = Value;
 				SkipWhitespace();
 				Expect(':');
-
+				SkipWhitespace();
 			} else {
 				throw std::exception("Invalid key in object");
 			}
@@ -197,9 +196,8 @@ Object Parser::ParseObject() {
 			}
 			Expect(',');
 			SkipWhitespace();
+			state = Key;
 		}
-
-		Advance();
 	}
 
 	if (state == Key) {
@@ -220,6 +218,8 @@ Array Parser::ParseArray() {
 	SkipWhitespace();
 
 	while (currChar != ']') {
+		std::cout << currChar << std::endl;
+
 		if(isEOF) {
 			throw std::exception("Unexpected end of file");
 		}
@@ -258,12 +258,16 @@ Array Parser::ParseArray() {
 		}
 
 		SkipWhitespace();
-		ExpectEither({ ',', ']' });
+		if (currChar == ']') break;
+		Expect(',');
 		SkipWhitespace();
 	}
 
-	// Since currChar == ']'
-	Advance();
+	Advance(); // Since currChar == ']'
 
 	return Array{ array };
+}
+
+void Json::PrintAsYaml(std::ofstream& output) {
+	
 }

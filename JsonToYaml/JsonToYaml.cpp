@@ -2,7 +2,8 @@
 #include <string>
 #include <iostream>
 
-#include "Parser.cpp"
+#include "Parser.h"
+#include "YamlPrinter.h"
 
 int main()
 {
@@ -13,7 +14,10 @@ int main()
 		return 1;
 	}
 
-	Json result = ParseJson(input);
-
+	Json json = Json::Parse(input);
 	input.close();
+
+	std::ofstream output("./out.yaml");
+	json.PrintAsYaml(output);
+	output.close();
 }

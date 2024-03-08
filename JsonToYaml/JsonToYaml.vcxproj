@@ -130,9 +130,11 @@
   <ItemGroup>
     <ClCompile Include="JsonToYaml.cpp" />
     <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="YamlPrinter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Parser.h" />
+    <ClInclude Include="YamlPrinter.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="test.json" />
