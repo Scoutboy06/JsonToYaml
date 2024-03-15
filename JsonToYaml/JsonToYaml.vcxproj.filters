@@ -35,5 +35,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="test.json" />
+    <None Include="array.json" />
   </ItemGroup>
 </Project>

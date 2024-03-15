@@ -137,6 +137,7 @@
     <ClInclude Include="YamlPrinter.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="array.json" />
     <None Include="test.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

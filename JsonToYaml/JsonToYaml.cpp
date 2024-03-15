@@ -7,7 +7,7 @@
 
 int main()
 {
-	std::ifstream input("./test.json");
+	std::ifstream input("./array.json");
 
 	if (!input.is_open()) {
 		std::cout << "Unable to open file" << std::endl;
@@ -17,7 +17,7 @@ int main()
 	Json json = Json::Parse(input);
 	input.close();
 
-	std::ofstream output("./out.yaml");
+	std::ofstream output("./array.yaml");
 	json.PrintAsYaml(output);
 	output.close();
 }

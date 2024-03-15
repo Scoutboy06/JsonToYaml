@@ -1,6 +1,6 @@
 {
   "hello": "there",
-  "numbers": [ 0, 1, 2, 3 ],
+  "numbers": [ 0, 1, 2, 3, 3e6, 4E-10 ],
   "anObject": {
     "hello": "world",
     "build": "node ."

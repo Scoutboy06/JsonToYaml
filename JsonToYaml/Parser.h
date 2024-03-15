@@ -5,9 +5,9 @@
 #include <map>
 #include <vector>
 #include <fstream>
-#include <iostream>
 
-// Tokens
+#include "YamlPrinter.h"
+
 struct String {
 	std::string value;
 	bool operator<(const String& other) const { return value < other.value; };
@@ -15,13 +15,6 @@ struct String {
 struct Number { std::string value; };
 struct Boolean { bool value; };
 struct Null {};
-struct OpenCurly {};
-struct ClosedCurly {};
-struct OpenBracket {};
-struct ClosedBracket {};
-struct Colon {};
-struct Comma {};
-struct EndOfFile {};
 
 struct Object;
 struct Array;
@@ -36,19 +29,18 @@ using JsonValue = std::variant<
 >;
 
 struct Object {
-	std::map<String, JsonValue> value;
+	std::map<String, JsonValue> values;
 };
 struct Array {
-	std::vector<JsonValue> value;
+	std::vector<JsonValue> values;
 };
 
 
 class Json {
-private:
 public:
-	JsonValue body;
+	std::variant<Array, Object> body;
 
-	Json(JsonValue body) : body(body) {}
+	Json(std::variant<Array, Object> body) : body(body) {}
 
 	static Json Parse(std::ifstream& stream);
 

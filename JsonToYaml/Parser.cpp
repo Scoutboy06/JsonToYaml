@@ -11,14 +11,6 @@ Json Parser::Parse() {
 	switch (currChar) {
 		case '{': return Json{ ParseObject() };
 		case '[': return Json{ ParseArray() };
-		case '"': return Json{ ParseString() };
-		case 't':
-		case 'f': return Json{ ParseBoolean() };
-		case 'n': return Json{ ParseNull() };
-	}
-
-	if (std::isdigit(currChar)) {
-		return Json{ ParseNumber() };
 	}
 
 	throw std::exception("Invalid character at beginning of file");
@@ -191,9 +183,7 @@ Object Parser::ParseObject() {
 			}
 
 			SkipWhitespace();
-			if (currChar == '}') {
-				break;
-			}
+			if (currChar == '}') break;
 			Expect(',');
 			SkipWhitespace();
 			state = Key;
@@ -205,7 +195,7 @@ Object Parser::ParseObject() {
 	}
 
 
-	// Since currChar == '{', advance
+	// Since currChar == '}', advance
 	Advance();
 
 	return Object{ object };
@@ -267,5 +257,6 @@ Array Parser::ParseArray() {
 }
 
 void Json::PrintAsYaml(std::ofstream& output) {
-	
+	YamlPrinter printer(*this, output);
+	printer.Print();
 }
