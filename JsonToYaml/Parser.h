@@ -6,8 +6,6 @@
 #include <vector>
 #include <istream>
 
-#include "YamlPrinter.h"
-
 struct String {
 	std::string value;
 	bool operator<(const String& other) const { return value < other.value; };
@@ -42,9 +40,7 @@ public:
 
 	Json(std::variant<Array, Object> body) : body(body) {}
 
-	static Json Parse(std::ifstream& stream);
-
-	void PrintAsYaml(std::ofstream& outout);
+	static Json Parse(std::istream& stream);
 };
 
 class Parser {
@@ -62,6 +58,7 @@ private:
 	void Expect(char c);
 	void ExpectEither(std::initializer_list<char> list);
 
+	JsonValue ParseValue();
 	String ParseString();
 	Number ParseNumber();
 	Boolean ParseBoolean();
