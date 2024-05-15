@@ -1,6 +1,6 @@
 #include "Parser.h"
 
-Json Json::Parse(std::ifstream& stream) {
+Json Json::Parse(std::istream& stream) {
 	Parser parser(stream);
 	return parser.Parse();
 }
@@ -55,6 +55,22 @@ void Parser::ExpectEither(std::initializer_list<char> list) {
 	throw std::exception("Invalid token");
 }
 
+JsonValue Parser::ParseValue() {
+	switch (currChar) {
+		case '{': return ParseObject();
+		case '[': return ParseArray();
+		case '"': return ParseString();
+		case 't':
+		case 'f': return ParseBoolean();
+		case 'n': return ParseNull();
+		default:
+			if (std::isdigit(currChar) || currChar == '-')
+				return ParseNumber();
+	}
+
+	throw std::exception("Invalid character");
+}
+
 String Parser::ParseString() {
 	std::string result;
 
@@ -62,9 +78,10 @@ String Parser::ParseString() {
 	bool isEscaped = false;
 
 	while (!(currChar == '"' && !isEscaped)) {
-		if (currChar == '\\') {
+		if (currChar == '\\')
 			isEscaped = !isEscaped;
-		}
+		else
+			isEscaped = false;
 
 		result += currChar;
 		Advance();
@@ -148,52 +165,23 @@ Object Parser::ParseObject() {
 	Expect('{');
 	SkipWhitespace();
 
-	enum State { Key, Value };
-
-	State state = Key; // What we expect next
-	String key;
-
 	while (currChar != '}') {
-		if (state == Key) {
-			if (currChar == '"') {
-				key = ParseString();
-				state = Value;
-				SkipWhitespace();
-				Expect(':');
-				SkipWhitespace();
-			} else {
-				throw std::exception("Invalid key in object");
-			}
-		}
+		String key = ParseString();
 
-		else {
-			switch (currChar) {
-				case '{': object.insert_or_assign(key, ParseObject()); break;
-				case '[': object.insert_or_assign(key, ParseArray()); break;
-				case '"': object.insert_or_assign(key, ParseString()); break;
-				case 't':
-				case 'f': object.insert_or_assign(key, ParseBoolean()); break;
-				case 'n': object.insert_or_assign(key, ParseNull()); break;
-				default:
-					if (std::isdigit(peekChar)) {
-						object.insert_or_assign(key, ParseNumber());
-					} else {
-						throw std::exception("Invalid character");
-					}
-			}
+		SkipWhitespace();
+		Expect(':');
+		SkipWhitespace();
 
-			SkipWhitespace();
-			if (currChar == '}') break;
-			Expect(',');
-			SkipWhitespace();
-			state = Key;
-		}
+		object.emplace(key, ParseValue());
+
+		SkipWhitespace();
+
+		if (currChar == '}')
+			break;
+
+		Expect(',');
+		SkipWhitespace();
 	}
-
-	if (state == Key) {
-		throw std::exception("Unexpected end of object");
-	}
-
 
 	// Since currChar == '}', advance
 	Advance();
@@ -226,7 +214,7 @@ Array Parser::ParseArray() {
 		}
 		
 		// Number
-		else if (std::isdigit(currChar)) {
+		else if (std::isdigit(currChar) || currChar == '-') {
 			array.push_back(ParseNumber());
 		}
 		
@@ -246,7 +234,8 @@ Array Parser::ParseArray() {
 		}
 
 		SkipWhitespace();
-		if (currChar == ']') break;
+		if (currChar == ']')
+			break;
 		Expect(',');
 		SkipWhitespace();
 	}
@@ -254,9 +243,4 @@ Array Parser::ParseArray() {
 	Advance(); // Since currChar == ']'
 
 	return Array{ array };
-}
-
-void Json::PrintAsYaml(std::ofstream& output) {
-	YamlPrinter printer(*this, output);
-	printer.Print();
 }

@@ -23,6 +23,6 @@ private:
 	void PrintValue(const JsonValue& value);
 	void PrintArray(const Array& array);
 	void PrintObject(const Object& object);
-	void PrintString(const String& string);
+	void PrintString(const String& str);
 };
 

@@ -16,6 +16,7 @@ int main() {
 	input.close();
 
 	std::ofstream output("./array.yaml");
-	json.PrintAsYaml(output);
+	YamlPrinter printer(json, output);
+	printer.Print();
 	output.close();
 }
