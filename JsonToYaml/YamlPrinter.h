@@ -2,7 +2,7 @@
 
 #include <variant>
 #include <string>
-#include <fstream>
+#include <ostream>
 
 #include "JsonTypes.h"
 #include "Parser.h"
@@ -11,11 +11,11 @@ const std::string singleQuoteChars(R"(:{}[],&*#?|-<>=!%@"')");
 
 class YamlPrinter {
 public:
-	YamlPrinter(Json& input, std::ofstream& output) : input(input), output(output) {}
+	YamlPrinter(Json& input, std::ostream& output) : input(input), output(output) {}
 
 	void Print();
 private:
-	std::ofstream& output;
+	std::ostream& output;
 	Json& input;
 
 	int indentLevel = -1;

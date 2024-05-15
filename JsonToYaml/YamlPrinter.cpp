@@ -45,7 +45,6 @@ void YamlPrinter::PrintArray(const Array& array) {
 	indentLevel++;
 	size_t i = 0;
 
-	int i = 0;
 	for(const JsonValue& value : array.values) {
 		if (indentLevel > 0) {
 			output << std::string(indentLevel, ' ');

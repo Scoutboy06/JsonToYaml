@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include <istream>
+#include <sstream>
 
 #include "JsonTypes.h"
 #include "YamlPrinter.h"
@@ -41,3 +42,14 @@ public:
 
 	Json Parse();
 };
+
+static Json ParseJson(std::istream& stream) {
+	Parser parser(stream);
+	return parser.Parse();
+}
+
+static Json ParseJson(const std::string& string) {
+	std::stringstream stream(string);
+	Parser parser(stream);
+	return parser.Parse();
+}

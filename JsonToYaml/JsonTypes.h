@@ -4,7 +4,8 @@
 #include <variant>
 #include <map>
 #include <vector>
-#include <fstream>
+#include <istream>
+#include <ostream>
 
 struct String {
 	std::string value;
@@ -37,8 +38,5 @@ struct Json {
 	std::variant<Array, Object> body;
 
 	Json(std::variant<Array, Object> body) : body(body) {}
-
-	static Json Parse(std::ifstream& stream);
-
-	void PrintAsYaml(std::ofstream& outout);
 };
+

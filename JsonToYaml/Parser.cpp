@@ -1,10 +1,5 @@
 #include "Parser.h"
 
-Json Json::Parse(std::istream& stream) {
-	Parser parser(stream);
-	return parser.Parse();
-}
-
 Json Parser::Parse() {
 	SkipWhitespace();
 
@@ -244,3 +239,4 @@ Array Parser::ParseArray() {
 
 	return Array{ array };
 }
+

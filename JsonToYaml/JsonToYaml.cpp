@@ -12,10 +12,11 @@ int main() {
 		return 1;
 	}
 
-	Json json = Json::Parse(input);
+	Json json = ParseJson(input);
 	input.close();
 
 	std::ofstream output("./array.yaml");
+
 	YamlPrinter printer(json, output);
 	printer.Print();
 	output.close();
