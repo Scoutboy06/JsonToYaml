@@ -133,6 +133,7 @@
     <ClCompile Include="YamlPrinter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="JsonTypes.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="YamlPrinter.h" />
   </ItemGroup>

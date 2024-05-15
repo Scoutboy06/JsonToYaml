@@ -6,46 +6,8 @@
 #include <vector>
 #include <fstream>
 
+#include "JsonTypes.h"
 #include "YamlPrinter.h"
-
-struct String {
-	std::string value;
-	bool operator<(const String& other) const { return value < other.value; };
-};
-struct Number { std::string value; };
-struct Boolean { bool value; };
-struct Null {};
-
-struct Object;
-struct Array;
-
-using JsonValue = std::variant<
-	Object,
-	Array,
-	String,
-	Number,
-	Boolean,
-	Null
->;
-
-struct Object {
-	std::map<String, JsonValue> values;
-};
-struct Array {
-	std::vector<JsonValue> values;
-};
-
-
-class Json {
-public:
-	std::variant<Array, Object> body;
-
-	Json(std::variant<Array, Object> body) : body(body) {}
-
-	static Json Parse(std::ifstream& stream);
-
-	void PrintAsYaml(std::ofstream& outout);
-};
 
 class Parser {
 private:

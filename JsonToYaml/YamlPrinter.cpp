@@ -10,51 +10,111 @@ void YamlPrinter::Print() {
 	}
 }
 
+void YamlPrinter::PrintValue(const JsonValue& value) {
+	if (auto* str = std::get_if<String>(&value)) {
+		PrintString(*str);
+	}
+
+	else if (auto* num = std::get_if<Number>(&value)) {
+		output << num->value;
+	}
+
+	else if (auto* b = std::get_if<Boolean>(&value)) {
+		if (b->value == true)
+			output << "true";
+		else
+			output << "false";
+	}
+
+	else if (std::holds_alternative<Null>(value)) {
+		output << '~';
+	}
+
+	else if (auto* obj = std::get_if<Object>(&value)) {
+		output << '\n';
+		PrintObject(*obj);
+	}
+
+	else if (auto* arr = std::get_if<Array>(&value)) {
+		output << '\n';
+		PrintArray(*arr);
+	}
+}
+
 void YamlPrinter::PrintArray(const Array& array) {
 	indentLevel++;
-	output << std::endl;
 	size_t i = 0;
 
 	for(const JsonValue& value : array.values) {
-		// Indentation
-		output
-			<< std::string(' ', indentLevel)
-			<< "- ";
-
-		if (auto str = std::get_if<String>(&value)) {
-			output << str->value;
+		if (indentLevel > 0) {
+			output << std::string(indentLevel, ' ');
 		}
 
-		else if (auto num = std::get_if<Number>(&value)) {
-			output << num->value;
-		}
+		output << "- ";
+		PrintValue(value);
 
-		else if (auto b = std::get_if<Boolean>(&value)) {
-			output << b->value;
-		}
-
-		else if (auto obj = std::get_if<Object>(&value)) {
-			PrintObject(*obj);
-		}
-
-		else if (auto arr = std::get_if<Array>(&value)) {
-			output << std::endl;
-			PrintArray(*arr);
-		}
-
-		// Don't print null values
-		//else if (std::holds_alternative<Null>(value));
-
-		// Don't print endl after last item
+		// Don't print new line after last item
 		if(i < array.values.size() - 1) {
-			output << std::endl;
+			output << '\n';
 		}
+
 		i++;
 	}
 
 	indentLevel--;
 }
 
-void YamlPrinter::PrintObject(const Object& object) {}
+void YamlPrinter::PrintObject(const Object& object) {
+	indentLevel++;
 
-void YamlPrinter::PrintString(const String& string) {}
+	size_t i = 0;
+
+	for (auto& [key, value] : object.values) {
+		output << std::string(indentLevel, ' ');
+		PrintString(key);
+		output << ": ";
+		PrintValue(value);
+
+		// Don't print new line after last item
+		if (i < object.values.size() - 1) {
+			output << '\n';
+		}
+
+		i++;
+	}
+
+	indentLevel--;
+}
+
+void YamlPrinter::PrintString(const String& string) {
+	// First, determine the quotation type
+
+	enum Quotation { Single, Double, None };
+	Quotation quot = None;
+
+	for (char c : string.value) {
+		if (c == '\\') {
+			quot = Double;
+			break;
+		}
+
+		else if (singleQuoteChars.find(c) != std::string::npos) {
+			quot = Single;
+		}
+	}
+
+	if (quot == Single) output << '\'';
+	else if (quot == Double) output << '"';
+	
+	for (char c : string.value) {
+		if (c == '\'' && quot == Single) {
+			// Escape ' character with ' character
+			output << '\'';
+		}
+
+		output << c;
+	}
+
+	if (quot == Single) output << '\'';
+	else if (quot == Double) output << '"';
+}

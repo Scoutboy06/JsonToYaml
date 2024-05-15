@@ -3,14 +3,12 @@
 #include <iostream>
 
 #include "Parser.h"
-#include "YamlPrinter.h"
 
-int main()
-{
+int main() {
 	std::ifstream input("./array.json");
 
 	if (!input.is_open()) {
-		std::cout << "Unable to open file" << std::endl;
+		std::cout << "Unable to open file\n";
 		return 1;
 	}
 

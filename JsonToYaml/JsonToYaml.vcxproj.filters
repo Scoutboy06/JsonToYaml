@@ -32,6 +32,9 @@
     <ClInclude Include="YamlPrinter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="JsonTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="test.json" />
