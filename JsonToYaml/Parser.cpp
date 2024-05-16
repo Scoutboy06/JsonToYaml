@@ -39,17 +39,6 @@ void Parser::Expect(char c) {
 	Advance();
 }
 
-void Parser::ExpectEither(std::initializer_list<char> list) {
-	for (char ch : list) {
-		if (ch == currChar) {
-			Advance();
-			return;
-		}
-	}
-
-	throw std::exception("Invalid token");
-}
-
 JsonValue Parser::ParseValue() {
 	switch (currChar) {
 		case '{': return ParseObject();
